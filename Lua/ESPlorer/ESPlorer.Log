@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="windows-1252" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2016-07-03T16:56:46</date>
+  <millis>1467579406859</millis>
+  <sequence>6</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Load saved settings: Firmware:NodeMCU</message>
+</record>
+<record>
+  <date>2016-07-03T16:56:46</date>
+  <millis>1467579406889</millis>
+  <sequence>7</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Snippets: loading...</message>
+</record>
+<record>
+  <date>2016-07-03T16:56:47</date>
+  <millis>1467579407299</millis>
+  <sequence>8</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Snippets load: Success.</message>
+</record>
+<record>
+  <date>2016-07-03T16:56:47</date>
+  <millis>1467579407442</millis>
+  <sequence>9</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Set new color theme: Success.</message>
+</record>
+<record>
+  <date>2016-07-03T16:56:47</date>
+  <millis>1467579407456</millis>
+  <sequence>10</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Load saved settings: DONE.</message>
+</record>
+<record>
+  <date>2016-07-03T16:56:47</date>
+  <millis>1467579407460</millis>
+  <sequence>11</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Snippets: loading...</message>
+</record>
+<record>
+  <date>2016-07-03T16:56:47</date>
+  <millis>1467579407465</millis>
+  <sequence>12</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Snippets load: Success.</message>
+</record>
+<record>
+  <date>2016-07-03T16:56:48</date>
+  <millis>1467579408055</millis>
+  <sequence>13</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Scan system...</message>
+</record>
+<record>
+  <date>2016-07-03T16:56:48</date>
+  <millis>1467579408104</millis>
+  <sequence>14</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>found last saved serial port COM5</message>
+</record>
+<record>
+  <date>2016-07-03T16:56:48</date>
+  <millis>1467579408111</millis>
+  <sequence>15</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Scan done.</message>
+</record>
+<record>
+  <date>2016-07-03T16:58:59</date>
+  <millis>1467579539645</millis>
+  <sequence>16</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>New empty file ready.</message>
+</record>
+<record>
+  <date>2016-07-03T17:00:14</date>
+  <millis>1467579614145</millis>
+  <sequence>17</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Set new color theme: Success.</message>
+</record>
+<record>
+  <date>2016-07-03T17:00:34</date>
+  <millis>1467579634396</millis>
+  <sequence>18</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Set new color theme: Success.</message>
+</record>
+<record>
+  <date>2016-07-03T17:00:36</date>
+  <millis>1467579636812</millis>
+  <sequence>19</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Set new color theme: Success.</message>
+</record>
+<record>
+  <date>2016-07-03T17:00:39</date>
+  <millis>1467579639079</millis>
+  <sequence>20</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Set new color theme: Success.</message>
+</record>
+<record>
+  <date>2016-07-03T17:00:41</date>
+  <millis>1467579641601</millis>
+  <sequence>21</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Set new color theme: Success.</message>
+</record>
+<record>
+  <date>2016-07-03T17:01:11</date>
+  <millis>1467579671349</millis>
+  <sequence>22</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Set new color theme: Success.</message>
+</record>
+<record>
+  <date>2016-07-03T17:06:04</date>
+  <millis>1467579964347</millis>
+  <sequence>23</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Saving new file...</message>
+</record>
+<record>
+  <date>2016-07-03T17:06:20</date>
+  <millis>1467579980422</millis>
+  <sequence>24</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Try to saving file config.lua ...</message>
+</record>
+<record>
+  <date>2016-07-03T17:06:20</date>
+  <millis>1467579980425</millis>
+  <sequence>25</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Save file config.lua: Success.</message>
+</record>
+<record>
+  <date>2016-07-03T17:06:25</date>
+  <millis>1467579985405</millis>
+  <sequence>26</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>FileTab removed: Success.</message>
+</record>
+<record>
+  <date>2016-07-03T17:06:25</date>
+  <millis>1467579985408</millis>
+  <sequence>27</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>File close: Success.</message>
+</record>
+<record>
+  <date>2016-07-03T17:06:32</date>
+  <millis>1467579992166</millis>
+  <sequence>28</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>New empty file ready.</message>
+</record>
+<record>
+  <date>2016-07-03T17:09:22</date>
+  <millis>1467580162812</millis>
+  <sequence>29</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>We save known file config.lua</message>
+</record>
+<record>
+  <date>2016-07-03T17:09:22</date>
+  <millis>1467580162815</millis>
+  <sequence>30</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Try to saving file config.lua ...</message>
+</record>
+<record>
+  <date>2016-07-03T17:09:22</date>
+  <millis>1467580162825</millis>
+  <sequence>31</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Save file config.lua: Success.</message>
+</record>
+<record>
+  <date>2016-07-03T17:26:50</date>
+  <millis>1467581210516</millis>
+  <sequence>32</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Saving new file...</message>
+</record>
+<record>
+  <date>2016-07-03T17:26:57</date>
+  <millis>1467581217264</millis>
+  <sequence>33</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Try to saving file setup.lua ...</message>
+</record>
+<record>
+  <date>2016-07-03T17:26:57</date>
+  <millis>1467581217267</millis>
+  <sequence>34</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Save file setup.lua: Success.</message>
+</record>
+<record>
+  <date>2016-07-03T17:27:02</date>
+  <millis>1467581222203</millis>
+  <sequence>35</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>FileTab removed: Success.</message>
+</record>
+<record>
+  <date>2016-07-03T17:27:02</date>
+  <millis>1467581222204</millis>
+  <sequence>36</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>File close: Success.</message>
+</record>
+<record>
+  <date>2016-07-03T17:27:02</date>
+  <millis>1467581222206</millis>
+  <sequence>37</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>File changed. Ask before closing.</message>
+</record>
+<record>
+  <date>2016-07-03T17:27:04</date>
+  <millis>1467581224439</millis>
+  <sequence>38</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>We save known file config.lua</message>
+</record>
+<record>
+  <date>2016-07-03T17:27:04</date>
+  <millis>1467581224440</millis>
+  <sequence>39</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Try to saving file config.lua ...</message>
+</record>
+<record>
+  <date>2016-07-03T17:27:04</date>
+  <millis>1467581224444</millis>
+  <sequence>40</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>Save file config.lua: Success.</message>
+</record>
+<record>
+  <date>2016-07-03T17:27:04</date>
+  <millis>1467581224487</millis>
+  <sequence>41</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>FileTab cleared: Success.</message>
+</record>
+<record>
+  <date>2016-07-03T17:27:04</date>
+  <millis>1467581224488</millis>
+  <sequence>42</sequence>
+  <logger>ESPlorer.ESPlorer</logger>
+  <level>INFO</level>
+  <class>ESPlorer.ESPlorer</class>
+  <method>log</method>
+  <thread>15</thread>
+  <message>File close: Success.</message>
+</record>
+</log>
