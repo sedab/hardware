@@ -5,9 +5,18 @@
 
 #define BUFFER_SIZE 200
 
+//Clock parameters
+#define CPU_HZ 48000000
+#define TIMER_PRESCALER 1024
+
+//Sample rate for reading the accelerometer
+#define FREQUENCY_HZ 2
+
 const char* ssid = "nahnahnahnah"; //your SSID
 const char* password = "cheese11"; //your Password
 
+//Not the best way to use A1 and A5, but for right now
+//it is convenient to jsut plug in sensor on the breadboard
 const int VCC = A1;
 const int Xaxis = A2;
 const int Yaxis = A3;
@@ -17,11 +26,12 @@ const int GND = A5;
 char msg[1200];
 int xaxis, yaxis, zaxis;
 int root_mean_square;
-int dataBuffer[BUFFER_SIZE];
+int dataBuffer[BUFFER_SIZE] = {0};
+int buffer_position=0;
 
 String packetTotal, packetHeader, packetData, packetTail;
 
-IPAddress ServeR = {52, 204, 229, 101}; // Amazon
+IPAddress ServeR = {52, 204, 229, 101}; // AWS
 
 WiFiClient WIFIclient;
 PubSubClient client(WIFIclient);
@@ -49,27 +59,70 @@ void setup() {
 
   Connect_to_wifi();
   Connect_to_mqtt();
-
-  for (int i = 0; i < BUFFER_SIZE; i++) {
-    dataBuffer[i] = 0;
-  }
+  startTimer(FREQUENCY_HZ);
 }
 
 void loop() {
   delay(1000);
-  
+
   scanTag(); //If bracelet is close, scan it.
 
   if (!client.connected()) {
     reconnect();
   }
-  recordData();
+
   packetTotal = packetHeader + packetData + packetTail;
   client.loop();
   packetTotal.toCharArray(msg, 1200);
   Serial.println(packetTotal);
   Serial.println(msg);
   packetData = "";
+}
+
+void setTimerFrequency(int frequencyHz) {
+  int compare_value = (CPU_HZ / (TIMER_PRESCALER * frequencyHz)) - 1;
+  TcCount16* TC = (TcCount16*) TC3;
+
+  TC->CC[0].reg = compare_value;
+  while (TC->STATUS.bit.SYNCBUSY == 1);
+}
+
+void startTimer(int frequencyHz) {
+  REG_GCLK_CLKCTRL = (uint16_t) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID (GCM_TCC2_TC3)) ;
+  while ( GCLK->STATUS.bit.SYNCBUSY == 1 );
+
+  TcCount16* TC = (TcCount16*) TC3;
+
+  TC->CTRLA.reg &= ~TC_CTRLA_ENABLE;
+
+  TC->CTRLA.reg |= TC_CTRLA_MODE_COUNT16;
+  while (TC->STATUS.bit.SYNCBUSY == 1);
+
+  TC->CTRLA.reg |= TC_CTRLA_WAVEGEN_MFRQ;
+  while (TC->STATUS.bit.SYNCBUSY == 1);
+
+  TC->CTRLA.reg |= TC_CTRLA_PRESCALER_DIV1024;
+  while (TC->STATUS.bit.SYNCBUSY == 1);
+
+  setTimerFrequency(frequencyHz);
+
+  TC->INTENSET.reg = 0;
+  TC->INTENSET.bit.MC0 = 1;
+
+  NVIC_EnableIRQ(TC3_IRQn);
+
+  TC->CTRLA.reg |= TC_CTRLA_ENABLE;
+  while (TC->STATUS.bit.SYNCBUSY == 1);
+}
+
+//This is where reading the IMU happens
+void TC3_Handler() {
+  TcCount16* TC = (TcCount16*) TC3;
+  //If the time hits are value, this code runs
+  if (TC->INTFLAG.bit.MC0 == 1) {
+    TC->INTFLAG.bit.MC0 = 1;
+    recordData();
+  }
 }
 
 void Connect_to_wifi() {
@@ -97,19 +150,21 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 void recordData() {
+  
+  //read all the axis
   xaxis = analogRead(Xaxis);
   yaxis = analogRead(Yaxis);
   zaxis = analogRead(Zaxis);
+
+  //calculate the RMS
   root_mean_square = sqrt(xaxis * xaxis + yaxis * yaxis + zaxis * zaxis);
-  for (int i = BUFFER_SIZE - 1; i > 0; i--) {
-    dataBuffer[i] = dataBuffer[i - 1];
-  }
-  dataBuffer[0] = root_mean_square;
-  if (abs(dataBuffer[0] - dataBuffer[1]) > 10) {
-    for (int k = 0; k < BUFFER_SIZE; k++) {
-      packetData += dataBuffer[k];
-      packetData += ",";
-    }
+
+  //record it into the buffer
+  dataBuffer[buffer_position]=root_mean_square
+
+  //if buffer is full, send the data
+  if(buffer_position=BUFFER_SIZE-1){
+    
   }
 
 }
