@@ -114,6 +114,7 @@ void reconnect() {
 
     if (client.connect("MKRclient")) {
       Serial.println("Connected to the MQTT server!");
+      /*
       digitalWrite(debugLED, HIGH);
       delay(200);
       digitalWrite(debugLED, LOW);
@@ -126,6 +127,7 @@ void reconnect() {
       delay(200);
       digitalWrite(debugLED, LOW);
       delay(200);
+      */
       client.publish("fitai", "Hi, I am a sensor");
       client.subscribe("fitai");
     }
@@ -146,11 +148,12 @@ void setup() {
   Serial.println("Communication with the computer started");
   Serial.println();
 
+  /*
   pinMode(debugLED, OUTPUT);
   digitalWrite(debugLED, HIGH);
   delay(2000);
   digitalWrite(debugLED, LOW);
-
+  */
   //awailable networks
   Serial.print("Number of networks awilable: ");
   byte numSsid = WiFi.scanNetworks();
@@ -167,7 +170,7 @@ void setup() {
   }
   Serial.println("Connected");
 
-  WiFiInfo();
+  //WiFiInfo();
 
   //connecting to MQTT server
   client.setServer(ServeR, 1883);

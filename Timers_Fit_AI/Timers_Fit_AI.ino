@@ -1,6 +1,6 @@
 #define CPU_HZ 48000000
 #define TIMER_PRESCALER 1024
-#define FREQUENCY_HZ 4
+#define FREQUENCY_HZ 2
 
 
 bool isLEDOn = false;
@@ -10,7 +10,6 @@ void setup() {
   startTimer(FREQUENCY_HZ);
   Serial.begin(9600);
   while (!Serial) {
-
   }
 
 }

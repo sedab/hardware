@@ -10,10 +10,14 @@
 #define TIMER_PRESCALER 1024
 
 //Sample rate for reading the accelerometer
-#define FREQUENCY_HZ 2
+#define FREQUENCY_HZ 0.5
 
 const char* ssid = "nahnahnahnah"; //your SSID
 const char* password = "cheese11"; //your Password
+
+IPAddress ServeR = {52, 204, 229, 101}; // AWS
+WiFiClient WIFIclient;
+PubSubClient client(WIFIclient);
 
 //Not the best way to use A1 and A5, but for right now
 //it is convenient to jsut plug in sensor on the breadboard
@@ -27,14 +31,11 @@ char msg[1200];
 int xaxis, yaxis, zaxis;
 int root_mean_square;
 int dataBuffer[BUFFER_SIZE] = {0};
-int buffer_position=0;
+int buffer_position = 0;
 
 String packetTotal, packetHeader, packetData, packetTail;
 
-IPAddress ServeR = {52, 204, 229, 101}; // AWS
-
-WiFiClient WIFIclient;
-PubSubClient client(WIFIclient);
+//IPAddress ServeR = {72,227,147,224}; //Kyle
 
 
 void setup() {
@@ -42,8 +43,11 @@ void setup() {
   while (!Serial) {
     ;//waiting for srial communication to start
   }
-  Serial1.begin(9600); //MKR1000 RX & TX Serial communication
-
+  //Serial1.begin(9600); //MKR1000 RX & TX Serial communication
+  Serial.println("Communication with the computer started");
+  Serial.println();
+  Connect_to_wifi();
+  Connect_to_mqtt();
   //OUTPUTS
   pinMode(VCC, OUTPUT);
   pinMode(GND, OUTPUT);
@@ -57,26 +61,15 @@ void setup() {
   digitalWrite(VCC, HIGH);
   digitalWrite(GND, LOW);
 
-  Connect_to_wifi();
-  Connect_to_mqtt();
-  startTimer(FREQUENCY_HZ);
+  //startTimer(FREQUENCY_HZ);
 }
 
 void loop() {
-  delay(1000);
-
-  scanTag(); //If bracelet is close, scan it.
-
+  //delay(1000);
+  //scanTag(); //If bracelet is close, scan it.
   if (!client.connected()) {
     reconnect();
   }
-
-  packetTotal = packetHeader + packetData + packetTail;
-  client.loop();
-  packetTotal.toCharArray(msg, 1200);
-  Serial.println(packetTotal);
-  Serial.println(msg);
-  packetData = "";
 }
 
 void setTimerFrequency(int frequencyHz) {
@@ -121,7 +114,8 @@ void TC3_Handler() {
   //If the time hits are value, this code runs
   if (TC->INTFLAG.bit.MC0 == 1) {
     TC->INTFLAG.bit.MC0 = 1;
-    recordData();
+   // recordData();
+   Serial.println("Interrupted");
   }
 }
 
@@ -150,7 +144,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 void recordData() {
-  
+
   //read all the axis
   xaxis = analogRead(Xaxis);
   yaxis = analogRead(Yaxis);
@@ -160,14 +154,31 @@ void recordData() {
   root_mean_square = sqrt(xaxis * xaxis + yaxis * yaxis + zaxis * zaxis);
 
   //record it into the buffer
-  dataBuffer[buffer_position]=root_mean_square
+  dataBuffer[buffer_position] = root_mean_square;
 
   //if buffer is full, send the data
-  if(buffer_position=BUFFER_SIZE-1){
-    
-  }
+  if (buffer_position = BUFFER_SIZE - 1) {
+    packetData = dataBuffer[0];
 
+    //copy all the numbers into string
+    for (int i = 1; i < BUFFER_SIZE; i++) {
+      packetData += ',' + dataBuffer[i];
+    }
+    buffer_position = 0;
+
+    //put all th eparts of the packet together
+    packetTotal = packetHeader + packetData + packetTail;
+    client.loop();
+    packetTotal.toCharArray(msg, 1200);
+    Serial.println(packetTotal);
+    Serial.println(msg);
+    packetData = "";
+  }
+  else {
+    buffer_position++;
+  }
 }
+
 
 void reconnect() {
   while (!client.connected()) {
@@ -181,8 +192,8 @@ void reconnect() {
     else {
       Serial.print("Error connecting to the server: ");
       Serial.println(client.state());
-      Serial.println("Will try again in 4 sec...");
-      delay(4000);
+      Serial.println("Will try again in 2 sec...");
+      delay(2000);
     }
   }
 }
