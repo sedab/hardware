@@ -11,8 +11,14 @@
 #define COMF_PIN 6
 
 //******internet connection and mqtt******
+//const char* ssid = "nahnahnahnah";
+//const char* password = "cheese11";
 const char* ssid = "Boris";
 const char* password = "subotica";
+
+//const char* ssid = "Columbia University";
+
+
 IPAddress ServeR = {52, 204, 229, 101}; // Amazon
 //IPAddress ServeR = {72, 227, 147, 224}; //Kyle
 
@@ -21,35 +27,45 @@ PubSubClient client(WIFIclient);
 
 //******accelerometer******
 const int VCC = A1;
-const int Xaxis = A2;
+const int Zaxis = A2;
 const int Yaxis = A3;
-const int Zaxis = A4;
+const int Xaxis = A4;
 const int GND = A5;
 
 //******fitai_variables******
 char msg[1032];
 int xaxis, yaxis, zaxis;
-int root_mean_square;
-int dataBuffer[BUFFER_SIZE] = {0};
+float root_mean_square;
+float dataBuffer[BUFFER_SIZE] = {0};
+int Xbuffer[BUFFER_SIZE] = {0};
+int Ybuffer[BUFFER_SIZE] = {0};
+int Zbuffer[BUFFER_SIZE] = {0};
 int buffer_position = 0;
 String packetTotal, packetHeader, packetData, packetTail;
+float Xdifference, Ydifference, Zdifference;
 
 
 void setup() {
+  /*
   Serial.begin(9600);
   while (!Serial) {
-    ;//waiting for srial communication to start
+    //waiting for srial communication to start
   }
+  */
+
+  /*
   Serial.println("Communication with the computer started");
   Serial.println();
   Serial.print("Trying to connect to: ");
   Serial.println(ssid);
+  */
+//  WiFi.begin(ssid);
   WiFi.begin(ssid, password);
   while (!WL_CONNECTED) {
-    delay(100);
-    Serial.print(".");
+    delay(10);
+    //Serial.print(".");
   }
-  Serial.println("Connected");
+  //Serial.println("Connected");
   connect_to_mqtt();
 
   //ACCELEROMETER SETUP
@@ -73,7 +89,7 @@ void setup() {
   packetTail = "]}}";
 
   startTimer(FREQUENCY_HZ);
-  WiFi.lowPowerMode();
+
 }
 
 void loop() {
@@ -95,19 +111,21 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 void reconnect() {
   while (!client.connected()) {
-    Serial.println("connecting to MQTT server");
+    //cli();//stop interrupts
+    //Serial.println("connecting to MQTT server");
 
     if (client.connect("MKRclient")) {
-      Serial.println("Connected to the MQTT server!");
+      //Serial.println("Connected to the MQTT server!");
       client.publish("fitai", "Hi, I am a sensor");
       client.subscribe("fitai");
     }
     else {
-      Serial.print("Error connecting to the server: ");
-      Serial.println(client.state());
-      Serial.println("Will try again in 4 sec...");
-      delay(4000);
+      //Serial.print("Error connecting to the server: ");
+     // Serial.println(client.state());
+     // Serial.println("Will try again in 1 sec...");
+      delay(1000);
     }
+    //sei();//allow interrupts
   }
 }
 
@@ -165,11 +183,22 @@ void recordData() {
   yaxis = analogRead(Yaxis);
   zaxis = analogRead(Zaxis);
 
-  //calculate the RMS
-  root_mean_square = sqrt(xaxis * xaxis + yaxis * yaxis + zaxis * zaxis);
+  Xbuffer[buffer_position] = xaxis;
+  Ybuffer[buffer_position] = yaxis;
+  Zbuffer[buffer_position] = zaxis;
 
-  //record it into the buffer
-  dataBuffer[buffer_position] = root_mean_square;
+  if (buffer_position) {
+    Xdifference = analog_to_ms(Xbuffer[buffer_position] - Xbuffer[buffer_position - 1]);
+    Ydifference = analog_to_ms(Ybuffer[buffer_position] - Ybuffer[buffer_position - 1]);
+    Zdifference = analog_to_ms(Zbuffer[buffer_position] - Zbuffer[buffer_position - 1]);
+
+
+    //calculate the RMS
+    root_mean_square = sqrt(Xdifference * Xdifference + Ydifference * Ydifference + Zdifference * Zdifference);
+
+    //record it into the buffer
+    dataBuffer[buffer_position - 1] = root_mean_square;
+  }
 
   //if buffer is full, send the data
   if (buffer_position == BUFFER_SIZE - 1) {
@@ -179,7 +208,7 @@ void recordData() {
     packetData = dataBuffer[0];
 
     //copy all the numbers into string
-    for (int i = 1; i < BUFFER_SIZE; i++) {
+    for (int i = 1; i < BUFFER_SIZE-1; i++) {
       packetData = packetData + ',' + dataBuffer[i];
     }
     buffer_position = 0;
@@ -188,7 +217,7 @@ void recordData() {
     packetTotal = packetHeader + packetData + packetTail;
     client.loop();
     packetTotal.toCharArray(msg, 1032);
-    Serial.println(msg);
+    //Serial.println(msg);
     client.publish("fitai", msg );
     packetData = "";
   }
@@ -196,3 +225,9 @@ void recordData() {
     buffer_position++;
   }
 }
+
+float analog_to_ms(int analog) {
+  float transform = analog / 10.2;
+  return transform;
+}
+

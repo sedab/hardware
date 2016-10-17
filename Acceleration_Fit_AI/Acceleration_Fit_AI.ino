@@ -1,9 +1,12 @@
 #include <math.h>
 //#include <Average.h>
 
-const int Xaxis = A3;
-const int Yaxis = A4;
-const int Zaxis = A5;
+const int GND = A5;
+const int Zaxis = A2;
+const int Yaxis = A3;
+const int Xaxis = A4;
+const int VCC = A1;
+
 int totalAcceleration;
 int xAcc, yAcc, zAcc;
 int rest;
@@ -12,15 +15,18 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Hi!");
 
+  pinMode(GND,OUTPUT);
+  pinMode(VCC,OUTPUT);
+  digitalWrite(GND,LOW);
+  digitalWrite(VCC,HIGH);
+
+  
   pinMode(Xaxis, INPUT);
   pinMode(Yaxis, INPUT);
   pinMode(Zaxis, INPUT);
-  delay(2000);
-  xAcc = analogRead(Xaxis);
-  yAcc = analogRead(Yaxis);
-  zAcc = analogRead(Zaxis);
 
-  rest = sqrt(square(xAcc) + square(yAcc) + square(zAcc));
+
+//  rest = sqrt(square(xAcc) + square(yAcc) + square(zAcc));
   /*
     for (int i = 0; i < 99; i++) {
     xAcc = analogRead(Xaxis);
@@ -46,8 +52,7 @@ void loop() {
   xAcc = analogRead(Xaxis);
   yAcc = analogRead(Yaxis);
   zAcc = analogRead(Zaxis);
-  totalAcceleration = sqrt(square(xAcc) + square(yAcc) + square(zAcc));
-  //Serial.println(3 * (abs(rest - totalAcceleration)));
+
   delay(10);
   Serial.print(xAcc);
   Serial.print("\t");
@@ -55,10 +60,10 @@ void loop() {
   Serial.print("\t");
   Serial.print(zAcc);
   Serial.print("\t");
-  Serial.print(totalAcceleration);
-  Serial.println();
+  Serial.println(" ");
 
-  delay(40);
+
+  delay(700);
 
 
 }
