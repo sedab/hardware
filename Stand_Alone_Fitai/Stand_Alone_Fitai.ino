@@ -4,103 +4,104 @@
 #include <String.h>
 
 //******clock and globals******
+//packeges are being sent ever (BUFFER_SIZE/FREQUENCY_HZ)= seconds
 #define BUFFER_SIZE 20
+#define FREQUENCY_HZ 20
 #define CPU_HZ 48000000
 #define TIMER_PRESCALER 1024
-#define FREQUENCY_HZ 20
-#define COMF_PIN 6
+#define DEBUG_LED 6
 
 //******internet connection and mqtt******
-//const char* ssid = "nahnahnahnah";
-//const char* password = "cheese11";
-const char* ssid = "Boris";
-const char* password = "subotica";
-
-//const char* ssid = "Columbia University";
-
-
+const char* ssid = "Apple Wireless";
+const char* password = "Say Cheese!";
 IPAddress ServeR = {52, 204, 229, 101}; // Amazon
 //IPAddress ServeR = {72, 227, 147, 224}; //Kyle
+
 
 WiFiClient WIFIclient;
 PubSubClient client(WIFIclient);
 
-//******accelerometer******
+//******accelerometer GY-61******
 const int VCC = A1;
-const int Zaxis = A2;
+const int Xaxis = A2;
 const int Yaxis = A3;
-const int Xaxis = A4;
+const int Zaxis = A4;
 const int GND = A5;
 
 //******fitai_variables******
 char msg[1032];
 int xaxis, yaxis, zaxis;
-float root_mean_square;
-float dataBuffer[BUFFER_SIZE] = {0};
-int Xbuffer[BUFFER_SIZE] = {0};
-int Ybuffer[BUFFER_SIZE] = {0};
-int Zbuffer[BUFFER_SIZE] = {0};
+int root_mean_square;
+int dataBuffer[BUFFER_SIZE] = {0};
 int buffer_position = 0;
-String packetTotal, packetHeader, packetData, packetTail;
-float Xdifference, Ydifference, Zdifference;
+String packetTotal, packetHeader1, packetHeader2 , packetData, packetTail, sampling_rate;
 
 
 void setup() {
-  /*
-  Serial.begin(9600);
-  while (!Serial) {
-    //waiting for srial communication to start
-  }
-  */
-
-  /*
-  Serial.println("Communication with the computer started");
-  Serial.println();
-  Serial.print("Trying to connect to: ");
-  Serial.println(ssid);
-  */
-//  WiFi.begin(ssid);
-  WiFi.begin(ssid, password);
-  while (!WL_CONNECTED) {
-    delay(10);
-    //Serial.print(".");
-  }
-  //Serial.println("Connected");
-  connect_to_mqtt();
-
-  //ACCELEROMETER SETUP
+  //***ACCELEROMETER SETUP***
   //OUTPUTS
   pinMode(VCC, OUTPUT);
   pinMode(GND, OUTPUT);
-
   //INPUTS
   pinMode(Xaxis, INPUT);
   pinMode(Yaxis, INPUT);
   pinMode(Zaxis, INPUT);
-
   //POWER SUPPLY FOR THE ACCELEROMETER
   digitalWrite(VCC, HIGH);
   digitalWrite(GND, LOW);
 
   //Debug LED
-  pinMode(COMF_PIN, OUTPUT);
+  pinMode(DEBUG_LED, OUTPUT);
 
-  packetHeader = "{\"header\": {\"athlete_id\": 123,\"lift_id\": 0,\"lift_sampling_rate\": 50,\"lift_start\": \"2012-04-23T18:25:43.511Z\",\"lift_type\" : \"deadlift\", \"lift_weight\": 100,\"lift_weight_units\": \"lbs\",\"lift_num_reps\": 10},\"content\":{\"a_x\": [";
+  //package form
+  //old header
+  //packetHeader = "{\"header\": {\"athlete_id\": 123,\"lift_id\": 0,\"lift_sampling_rate\": 50,\"lift_start\": \"2012-04-23T18:25:43.511Z\",\"lift_type\" : \"deadlift\", \"lift_weight\": 100,\"lift_weight_units\": \"lbs\",\"lift_num_reps\": 10},\"content\":{\"a_x\": [";
+
+  //new header
+  packetHeader1 = "{\"header\": {\"collar_id\": 555,\"lift_id\": \"None\" ,\"lift_sampling_rate\":";
+  packetHeader2 = "},\"content\":{\"a_x\": [";
+  sampling_rate = FREQUENCY_HZ;
   packetTail = "]}}";
 
+  //Connecting to wifi and mqtt
+  connect_to_wifi();
+  connect_to_mqtt();
+
+  //start interupts for recording accelereometer data
   startTimer(FREQUENCY_HZ);
 
+  //switch to power saving mode. Turns on wifi every 100ms
+  WiFi.lowPowerMode();
+  //WiFi.maxLowPowerMode(); //this one deosn't work for our application
 }
 
 void loop() {
+  //if not connected to wifi, reconnect
+  if (!WL_CONNECTED) {
+    digitalWrite(DEBUG_LED, LOW);
+    connect_to_wifi();
+  }
+  //if not connected to the MQTT server, reconnect
   if (!client.connected()) {
+    digitalWrite(DEBUG_LED, LOW);
     reconnect();
+  }
+}
+
+void connect_to_wifi() {
+  //connect and wait while its connecting
+  WiFi.begin(ssid, password);
+  while (!WL_CONNECTED) {
+    delay(100);
   }
 }
 
 void connect_to_mqtt() {
   client.setServer(ServeR, 1883);
   client.setCallback(callback);
+  if (!client.connected()) {
+    reconnect();
+  }
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -111,21 +112,24 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 void reconnect() {
   while (!client.connected()) {
-    //cli();//stop interrupts
-    //Serial.println("connecting to MQTT server");
 
     if (client.connect("MKRclient")) {
-      //Serial.println("Connected to the MQTT server!");
       client.publish("fitai", "Hi, I am a sensor");
       client.subscribe("fitai");
+      digitalWrite(DEBUG_LED, HIGH);
     }
     else {
-      //Serial.print("Error connecting to the server: ");
-     // Serial.println(client.state());
-     // Serial.println("Will try again in 1 sec...");
-      delay(1000);
+      //keep flasshing untill connected to MQTT server
+      //try to reconnect every 2.8s while it doesn't connect
+      digitalWrite(DEBUG_LED, LOW);
+      delay(700);
+      digitalWrite(DEBUG_LED, HIGH);
+      delay(700);
+      digitalWrite(DEBUG_LED, LOW);
+      delay(700);
+      digitalWrite(DEBUG_LED, HIGH);
+      delay(700);
     }
-    //sei();//allow interrupts
   }
 }
 
@@ -172,7 +176,6 @@ void TC3_Handler() {
   if (TC->INTFLAG.bit.MC0 == 1) {
     TC->INTFLAG.bit.MC0 = 1;
     recordData();
-    //Serial.println(buffer_position);
   }
 }
 
@@ -183,22 +186,11 @@ void recordData() {
   yaxis = analogRead(Yaxis);
   zaxis = analogRead(Zaxis);
 
-  Xbuffer[buffer_position] = xaxis;
-  Ybuffer[buffer_position] = yaxis;
-  Zbuffer[buffer_position] = zaxis;
+  //calculate the RMS
+  root_mean_square = sqrt(xaxis * xaxis + yaxis * yaxis + zaxis * zaxis);
 
-  if (buffer_position) {
-    Xdifference = analog_to_ms(Xbuffer[buffer_position] - Xbuffer[buffer_position - 1]);
-    Ydifference = analog_to_ms(Ybuffer[buffer_position] - Ybuffer[buffer_position - 1]);
-    Zdifference = analog_to_ms(Zbuffer[buffer_position] - Zbuffer[buffer_position - 1]);
-
-
-    //calculate the RMS
-    root_mean_square = sqrt(Xdifference * Xdifference + Ydifference * Ydifference + Zdifference * Zdifference);
-
-    //record it into the buffer
-    dataBuffer[buffer_position - 1] = root_mean_square;
-  }
+  //record it into the buffer
+  dataBuffer[buffer_position] = root_mean_square;
 
   //if buffer is full, send the data
   if (buffer_position == BUFFER_SIZE - 1) {
@@ -208,26 +200,26 @@ void recordData() {
     packetData = dataBuffer[0];
 
     //copy all the numbers into string
-    for (int i = 1; i < BUFFER_SIZE-1; i++) {
+    for (int i = 1; i < BUFFER_SIZE; i++) {
       packetData = packetData + ',' + dataBuffer[i];
     }
     buffer_position = 0;
 
-    //put all th eparts of the packet together
-    packetTotal = packetHeader + packetData + packetTail;
+    //put all the parts of the packet together
+    packetTotal = packetHeader1 + sampling_rate + packetHeader2 + packetData + packetTail;
     client.loop();
+
+    //convert from string to char array
     packetTotal.toCharArray(msg, 1032);
-    //Serial.println(msg);
+
+    //send the data
     client.publish("fitai", msg );
+
+    //clean the package
     packetData = "";
   }
   else {
+    //if buffer is not full, next piece of data goes to the next position
     buffer_position++;
   }
 }
-
-float analog_to_ms(int analog) {
-  float transform = analog / 10.2;
-  return transform;
-}
-
