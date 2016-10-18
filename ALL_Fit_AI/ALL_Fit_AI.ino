@@ -4,22 +4,24 @@
 #include <String.h>
 
 //******clock and globals******
+//packeges are being sent ever (BUFFER_SIZE/FREQUENCY_HZ)= seconds
 #define BUFFER_SIZE 20
+#define FREQUENCY_HZ 20
 #define CPU_HZ 48000000
 #define TIMER_PRESCALER 1024
-#define FREQUENCY_HZ 20
-#define COMF_PIN 6
+#define DEBUG_LED 6
 
 //******internet connection and mqtt******
-const char* ssid = "Boris";
-const char* password = "subotica";
+const char* ssid = "Apple Wireless";
+const char* password = "Say Cheese!";
 IPAddress ServeR = {52, 204, 229, 101}; // Amazon
 //IPAddress ServeR = {72, 227, 147, 224}; //Kyle
+
 
 WiFiClient WIFIclient;
 PubSubClient client(WIFIclient);
 
-//******accelerometer******
+//******accelerometer GY-61******
 const int VCC = A1;
 const int Xaxis = A2;
 const int Yaxis = A3;
@@ -32,59 +34,86 @@ int xaxis, yaxis, zaxis;
 int root_mean_square;
 int dataBuffer[BUFFER_SIZE] = {0};
 int buffer_position = 0;
-String packetTotal, packetHeader, packetData, packetTail;
+String packetTotal, packetHeader1, packetHeader2 , packetData, packetTail, sampling_rate;
 
 
 void setup() {
+  //Communication with serail port
   Serial.begin(9600);
   while (!Serial) {
     ;//waiting for srial communication to start
   }
-  Serial.println("Communication with the computer started");
-  Serial.println();
-  Serial.print("Trying to connect to: ");
-  Serial.println(ssid);
-  WiFi.begin(ssid, password);
-  while (!WL_CONNECTED) {
-    delay(100);
-    Serial.print(".");
-  }
-  Serial.println("Connected");
+  Serial.println("Communication with the computer started.\n");
+
+  //Connecting to wifi and mqtt
+  connect_to_wifi();
   connect_to_mqtt();
 
-  //ACCELEROMETER SETUP
+
+  //***ACCELEROMETER SETUP***
   //OUTPUTS
   pinMode(VCC, OUTPUT);
   pinMode(GND, OUTPUT);
-
   //INPUTS
   pinMode(Xaxis, INPUT);
   pinMode(Yaxis, INPUT);
   pinMode(Zaxis, INPUT);
-
   //POWER SUPPLY FOR THE ACCELEROMETER
   digitalWrite(VCC, HIGH);
   digitalWrite(GND, LOW);
 
   //Debug LED
-  pinMode(COMF_PIN, OUTPUT);
+  pinMode(DEBUG_LED, OUTPUT);
 
-  packetHeader = "{\"header\": {\"athlete_id\": 123,\"lift_id\": 0,\"lift_sampling_rate\": 50,\"lift_start\": \"2012-04-23T18:25:43.511Z\",\"lift_type\" : \"deadlift\", \"lift_weight\": 100,\"lift_weight_units\": \"lbs\",\"lift_num_reps\": 10},\"content\":{\"a_x\": [";
+  //package form
+  //old header
+  //packetHeader = "{\"header\": {\"athlete_id\": 123,\"lift_id\": 0,\"lift_sampling_rate\": 50,\"lift_start\": \"2012-04-23T18:25:43.511Z\",\"lift_type\" : \"deadlift\", \"lift_weight\": 100,\"lift_weight_units\": \"lbs\",\"lift_num_reps\": 10},\"content\":{\"a_x\": [";
+
+  //new header
+  packetHeader1 = "{\"header\": {\"collar_id\": 555,\"lift_id\": \"None\" ,\"lift_sampling_rate\":";
+  packetHeader2 = "},\"content\":{\"a_x\": [";
+  sampling_rate = FREQUENCY_HZ;
   packetTail = "]}}";
 
+  //start interupts for recording accelereometer data
   startTimer(FREQUENCY_HZ);
+
+  //switch to power saving mode. Turns on wifi every 100ms
   WiFi.lowPowerMode();
 }
 
 void loop() {
+  //if not connected to wifi, reconnect
+  if (!WL_CONNECTED) {
+    digitalWrite(DEBUG_LED, LOW);
+    connect_to_wifi();
+  }
+  //if not connected to the MQTT server, reconnect
   if (!client.connected()) {
+    digitalWrite(DEBUG_LED, LOW);
     reconnect();
   }
+}
+
+void connect_to_wifi() {
+  Serial.print("Trying to connect to: ");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+
+  //Print dots while waiting to connect
+  while (!WL_CONNECTED) {
+    delay(100);
+    Serial.print(".");
+  }
+  Serial.println("Connected");
 }
 
 void connect_to_mqtt() {
   client.setServer(ServeR, 1883);
   client.setCallback(callback);
+  if (!client.connected()) {
+    reconnect();
+  }
 }
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -101,12 +130,21 @@ void reconnect() {
       Serial.println("Connected to the MQTT server!");
       client.publish("fitai", "Hi, I am a sensor");
       client.subscribe("fitai");
+      digitalWrite(DEBUG_LED, HIGH);
     }
     else {
       Serial.print("Error connecting to the server: ");
       Serial.println(client.state());
       Serial.println("Will try again in 4 sec...");
-      delay(4000);
+      //keep flasshing untill connected to MQTT server
+      digitalWrite(DEBUG_LED, LOW);
+      delay(500);
+      digitalWrite(DEBUG_LED, HIGH);
+      delay(500);
+      digitalWrite(DEBUG_LED, LOW);
+      delay(500);
+      digitalWrite(DEBUG_LED, HIGH);
+      delay(500);
     }
   }
 }
@@ -154,7 +192,6 @@ void TC3_Handler() {
   if (TC->INTFLAG.bit.MC0 == 1) {
     TC->INTFLAG.bit.MC0 = 1;
     recordData();
-    //Serial.println(buffer_position);
   }
 }
 
@@ -184,15 +221,22 @@ void recordData() {
     }
     buffer_position = 0;
 
-    //put all th eparts of the packet together
-    packetTotal = packetHeader + packetData + packetTail;
+    //put all the parts of the packet together
+    packetTotal = packetHeader1 + sampling_rate + packetHeader2 + packetData + packetTail;
     client.loop();
+
+    //convert from string to char array
     packetTotal.toCharArray(msg, 1032);
     Serial.println(msg);
+
+    //send the data
     client.publish("fitai", msg );
+
+    //clean the package
     packetData = "";
   }
   else {
+    //if buffer is not full, next piece of data goes to the next position
     buffer_position++;
   }
 }
