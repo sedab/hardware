@@ -3,6 +3,7 @@
 #include <String.h>
 
 #define SECOND 1000
+#define mynet 192.168.1.1
 
 char ssid[] = "Fit A.I";
 
@@ -19,6 +20,7 @@ WiFiServer fitai_server(80);
 
 
 void setup() {
+
   //Communication with PC
   Serial.begin(9600);
   while (!Serial) {
@@ -34,9 +36,6 @@ void setup() {
     Serial.println("Creating AP Fit A.I failed");
     while (1);
   }
-
-  Serial.print("Status ");
-  Serial.println(status);
 
   delay (3 * SECOND);
 
@@ -123,13 +122,17 @@ void loop() {
       while (true);
     }
 
+    WiFi.disconnect();
+    status = WL_IDLE_STATUS;
+
     Serial.print("Connecting to: ");
     Serial.println(my_ssid);
     Serial.print("with the passowrd: ");
     Serial.println(my_pass);
     while (status != WL_CONNECTED) {
-      status = WiFi.begin(my_ssid, my_pass);
-      delay(2000);
+      status = WiFi.begin(my_ssid);
+      delay(10000);
+      Serial.print(". ");
     }
     if (WL_CONNECTED) {
       Serial.print("connected to: ");
@@ -165,12 +168,14 @@ void scan(char c) {
     //Serial.print(i);
   }
   test_string[7] = c;
-  if (c == '&' || c== 'H') {
+  if (c == '&' || c == 'H') {
     incoming_ssid = false;
     incoming_pass = false;
   }
   if (incoming_ssid) {
-
+    if (c == '+') {
+      c = ' ';
+    }
     my_ssid += c;
   }
   if (incoming_pass) {
@@ -185,7 +190,6 @@ void scan(char c) {
     incoming_pass = true;
   }
 }
-
 
 
 
