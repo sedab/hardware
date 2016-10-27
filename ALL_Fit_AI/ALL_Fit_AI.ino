@@ -74,9 +74,6 @@ void setup() {
   connect_to_wifi();
   connect_to_mqtt();
 
-  //switch to power saving mode. Turns on wifi every 100ms
-  WiFi.lowPowerMode();
-
   //start interupts for recording accelereometer data
   startTimer(FREQUENCY_HZ);
 }
@@ -84,6 +81,9 @@ void setup() {
 void loop() {
   //if not connected to wifi, reconnect
   if (!WL_CONNECTED) {
+    //disable power saving
+    WiFi.noLowPowerMode();
+
     //disable interrupt
     TcCount16* TC = (TcCount16*) TC3;
     TC->CTRLA.reg &= ~TC_CTRLA_ENABLE;
@@ -140,6 +140,10 @@ void reconnect() {
       Serial.println("Connected to the MQTT server!");
       client.publish("fitai", "Hi, I am a sensor");
       client.subscribe("fitai");
+      
+      //switch to power saving mode. Turns on wifi every 100ms
+      WiFi.lowPowerMode();
+      
       digitalWrite(DEBUG_LED, HIGH);
     }
     else {
