@@ -12,7 +12,7 @@
 #define DEBUG_LED 6
 
 //******internet connection and mqtt******
-const char* ssid = "Apple Wireless";
+const char* ssid = "City Wi-Fi";
 const char* password = "Say Cheese!";
 IPAddress ServeR = {52, 204, 229, 101}; // Amazon
 //IPAddress ServeR = {72, 227, 147, 224}; //Kyle
@@ -45,11 +45,6 @@ void setup() {
   }
   Serial.println("Communication with the computer started.\n");
 
-  //Connecting to wifi and mqtt
-  connect_to_wifi();
-  connect_to_mqtt();
-
-
   //***ACCELEROMETER SETUP***
   //OUTPUTS
   pinMode(VCC, OUTPUT);
@@ -65,7 +60,7 @@ void setup() {
   //Debug LED
   pinMode(DEBUG_LED, OUTPUT);
 
-  //package form
+  //***PACKAGE FORM***
   //old header
   //packetHeader = "{\"header\": {\"athlete_id\": 123,\"lift_id\": 0,\"lift_sampling_rate\": 50,\"lift_start\": \"2012-04-23T18:25:43.511Z\",\"lift_type\" : \"deadlift\", \"lift_weight\": 100,\"lift_weight_units\": \"lbs\",\"lift_num_reps\": 10},\"content\":{\"a_x\": [";
 
@@ -75,30 +70,45 @@ void setup() {
   sampling_rate = FREQUENCY_HZ;
   packetTail = "]}}";
 
-  //start interupts for recording accelereometer data
-  startTimer(FREQUENCY_HZ);
+  //Connecting to wifi and mqtt
+  connect_to_wifi();
+  connect_to_mqtt();
 
   //switch to power saving mode. Turns on wifi every 100ms
   WiFi.lowPowerMode();
+
+  //start interupts for recording accelereometer data
+  startTimer(FREQUENCY_HZ);
 }
 
 void loop() {
   //if not connected to wifi, reconnect
   if (!WL_CONNECTED) {
+    //disable interrupt
+    TcCount16* TC = (TcCount16*) TC3;
+    TC->CTRLA.reg &= ~TC_CTRLA_ENABLE;
+    while (TC->STATUS.bit.SYNCBUSY == 1);
     digitalWrite(DEBUG_LED, LOW);
     connect_to_wifi();
   }
   //if not connected to the MQTT server, reconnect
   if (!client.connected()) {
+    //disable interrupt
+    TcCount16* TC = (TcCount16*) TC3;
+    TC->CTRLA.reg &= ~TC_CTRLA_ENABLE;
+    while (TC->STATUS.bit.SYNCBUSY == 1);
     digitalWrite(DEBUG_LED, LOW);
     reconnect();
+
+    //reanable interrupt
+    startTimer(FREQUENCY_HZ);
   }
 }
 
 void connect_to_wifi() {
   Serial.print("Trying to connect to: ");
   Serial.println(ssid);
-  WiFi.begin(ssid, password);
+  WiFi.begin(ssid);
 
   //Print dots while waiting to connect
   while (!WL_CONNECTED) {
@@ -135,20 +145,22 @@ void reconnect() {
     else {
       Serial.print("Error connecting to the server: ");
       Serial.println(client.state());
-      Serial.println("Will try again in 4 sec...");
+      int waitTime = 4;
+      Serial.print("Will try again in: ");
+      Serial.print(waitTime);
+      Serial.println(" sec");
       //keep flasshing untill connected to MQTT server
-      digitalWrite(DEBUG_LED, LOW);
-      delay(500);
-      digitalWrite(DEBUG_LED, HIGH);
-      delay(500);
-      digitalWrite(DEBUG_LED, LOW);
-      delay(500);
-      digitalWrite(DEBUG_LED, HIGH);
-      delay(500);
+      for (int i = 0; i < (waitTime * 2); i++) {
+        digitalWrite(DEBUG_LED, LOW);
+        delay(250);
+        digitalWrite(DEBUG_LED, HIGH);
+        delay(250);
+      }
     }
   }
 }
 
+//Written by Nebojsa Petrovic https://goo.gl/pb6wdU
 void startTimer(int frequencyHz) {
   REG_GCLK_CLKCTRL = (uint16_t) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID (GCM_TCC2_TC3)) ;
   while ( GCLK->STATUS.bit.SYNCBUSY == 1 );
@@ -157,17 +169,21 @@ void startTimer(int frequencyHz) {
 
   TC->CTRLA.reg &= ~TC_CTRLA_ENABLE;
 
+  // Use the 16-bit timer
   TC->CTRLA.reg |= TC_CTRLA_MODE_COUNT16;
   while (TC->STATUS.bit.SYNCBUSY == 1);
 
+  // Use match mode so that the timer counter resets when the count matches the compare register
   TC->CTRLA.reg |= TC_CTRLA_WAVEGEN_MFRQ;
   while (TC->STATUS.bit.SYNCBUSY == 1);
 
+  // Set prescaler to 1024
   TC->CTRLA.reg |= TC_CTRLA_PRESCALER_DIV1024;
   while (TC->STATUS.bit.SYNCBUSY == 1);
 
   setTimerFrequency(frequencyHz);
 
+  // Enable the compare interrupt
   TC->INTENSET.reg = 0;
   TC->INTENSET.bit.MC0 = 1;
 
