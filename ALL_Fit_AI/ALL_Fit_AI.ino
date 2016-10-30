@@ -12,8 +12,8 @@
 #define DEBUG_LED 6
 
 //******internet connection and mqtt******
-const char* ssid = "Apple Wireless";
-const char* password = "Say Cheese!";
+const char* ssid = "City Wi-Fi";       //your SSID
+const char* password = "Say Cheese!";  //your password
 IPAddress ServeR = {52, 204, 229, 101}; // Amazon
 //IPAddress ServeR = {72, 227, 147, 224}; //Kyle
 
@@ -76,15 +76,15 @@ void setup() {
   packetTail = "]}}";
 
   //switch to power saving mode. Turns on wifi every 100ms
-  //WiFi.lowPowerMode();
-  
+  WiFi.lowPowerMode();
+
   //start interupts for recording accelereometer data
   startTimer(FREQUENCY_HZ);
 }
 
 void loop() {
   //if not connected to wifi, reconnect
-  if (!WL_CONNECTED) {
+  if (WiFi.status()!=WL_CONNECTED) {
     digitalWrite(DEBUG_LED, LOW);
     connect_to_wifi();
   }
@@ -98,11 +98,11 @@ void loop() {
 void connect_to_wifi() {
   Serial.print("Trying to connect to: ");
   Serial.println(ssid);
-  WiFi.begin(ssid, password);
+  WiFi.begin(ssid);
 
   //Print dots while waiting to connect
-  while (!WL_CONNECTED) {
-    delay(100);
+  while (WiFi.status()!=WL_CONNECTED) {
+    delay(300);
     Serial.print(".");
   }
   Serial.println("Connected");
