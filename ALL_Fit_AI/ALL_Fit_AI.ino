@@ -84,7 +84,7 @@ void setup() {
 
 void loop() {
   //if not connected to wifi, reconnect
-  if (WiFi.status()!=WL_CONNECTED) {
+  if (WiFi.status() != WL_CONNECTED) {
     digitalWrite(DEBUG_LED, LOW);
     connect_to_wifi();
   }
@@ -98,10 +98,10 @@ void loop() {
 void connect_to_wifi() {
   Serial.print("Trying to connect to: ");
   Serial.println(ssid);
-  WiFi.begin(ssid,password);
+  WiFi.begin(ssid, password);
 
   //Print dots while waiting to connect
-  while (WiFi.status()!=WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED) {
     delay(300);
     Serial.print(".");
   }
@@ -198,17 +198,29 @@ void TC3_Handler() {
 void recordData() {
 
   //read all the axis
-  /*  
-  int xaxis = analogRead(Xaxis);
-  int yaxis = analogRead(Yaxis);
-  int zaxis = analogRead(Zaxis);
+  /*
+    int xaxis = analogRead(Xaxis);
+    int yaxis = analogRead(Yaxis);
+    int zaxis = analogRead(Zaxis);
   */
-  float xaxis = (abs(508-analogRead(Xaxis)))*0.1001;
-  float yaxis = (abs(513-analogRead(Yaxis)))*0.099;
-  float zaxis = (abs(516-analogRead(Zaxis)))*0.0981;
+  int X = analogRead(Xaxis);
+  int Y = analogRead(Yaxis);
+  int Z = analogRead(Zaxis);
+  float xaxis = abs(508 - X);// * 0.1001;
+  float yaxis = abs(513 - Y);// * 0.099;
+  float zaxis = abs(516 - Z);// * 0.0981;
 
+  xaxis *= 0.1001;
+  yaxis *= 0.099;
+  zaxis *= 0.0981;
+  /*
+    Serial.print("x: "); Serial.print(xaxis); Serial.print("\t"); Serial.println (analogRead(Xaxis));
+    Serial.print("y: "); Serial.print(yaxis); Serial.print("\t"); Serial.println (analogRead(Yaxis));
+    Serial.print("z: "); Serial.print(zaxis); Serial.print("\t"); Serial.println (analogRead(Zaxis));
+  */
   //calculate the RMS
   root_mean_square = sqrt(xaxis * xaxis + yaxis * yaxis + zaxis * zaxis);
+  //Serial.print("RMS :"); Serial.println(root_mean_square);
 
   //record it into the buffer
   dataBuffer[buffer_position] = root_mean_square;
