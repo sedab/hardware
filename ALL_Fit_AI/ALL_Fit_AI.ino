@@ -2,6 +2,7 @@
 #include <PubSubClient.h>
 #include <SPI.h>
 #include <String.h>
+#include <math.h>
 
 //******clock and globals******
 //packeges are being sent ever (BUFFER_SIZE/FREQUENCY_HZ)= seconds
@@ -12,7 +13,7 @@
 #define DEBUG_LED 6
 
 //******internet connection and mqtt******
-const char* ssid = "City Wi-Fi";       //your SSID
+const char* ssid = "Apple Wireless";       //your SSID
 const char* password = "Say Cheese!";  //your password
 IPAddress ServeR = {52, 204, 229, 101}; // Amazon
 //IPAddress ServeR = {72, 227, 147, 224}; //Kyle
@@ -30,9 +31,8 @@ const int GND = A5;
 
 //******fitai_variables******
 char msg[1032];
-int xaxis, yaxis, zaxis;
-int root_mean_square;
-int dataBuffer[BUFFER_SIZE] = {0};
+float root_mean_square;
+float dataBuffer[BUFFER_SIZE] = {0};
 int buffer_position = 0;
 String packetTotal, packetHeader1, packetHeader2 , packetData, packetTail, sampling_rate;
 
@@ -98,7 +98,7 @@ void loop() {
 void connect_to_wifi() {
   Serial.print("Trying to connect to: ");
   Serial.println(ssid);
-  WiFi.begin(ssid);
+  WiFi.begin(ssid,password);
 
   //Print dots while waiting to connect
   while (WiFi.status()!=WL_CONNECTED) {
@@ -198,9 +198,14 @@ void TC3_Handler() {
 void recordData() {
 
   //read all the axis
-  xaxis = analogRead(Xaxis);
-  yaxis = analogRead(Yaxis);
-  zaxis = analogRead(Zaxis);
+  /*  
+  int xaxis = analogRead(Xaxis);
+  int yaxis = analogRead(Yaxis);
+  int zaxis = analogRead(Zaxis);
+  */
+  float xaxis = (abs(508-analogRead(Xaxis)))*0.1001;
+  float yaxis = (abs(513-analogRead(Yaxis)))*0.099;
+  float zaxis = (abs(516-analogRead(Zaxis)))*0.0981;
 
   //calculate the RMS
   root_mean_square = sqrt(xaxis * xaxis + yaxis * yaxis + zaxis * zaxis);
